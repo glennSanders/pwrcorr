@@ -1,0 +1,21 @@
+Package: pwrcorr
+Title: Correct Observed Engine Power from Tests and Dyno Results
+Version: 0.0.0.9000
+Authors@R: person("Glenn", "Sanders", email = "glennwilliamsanders@gmail.com", role = c("aut", "cre"))
+Description: Takes engine power and applies a correction to Reference Conditions of Temperature, 
+    Pressure, Humidity and Engine Friction utilising SAE J607, SAE J1394 (1990), SAE J1394 (2004) and 
+    ISO 1585 reference conditions.
+Depends: R (>= 3.5.0)
+License: GPL-3
+Encoding: UTF-8
+LazyData: true
+Imports:
+    units,
+    Rdpack
+RdMacros: Rdpack
+RoxygenNote: 6.0.1
+Suggests: knitr,
+    rmarkdown,
+    tidyverse,
+    ggforce
+VignetteBuilder: knitr
