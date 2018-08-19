@@ -97,7 +97,7 @@ pwr_corr <- function(ref_temp,ref_press,humidity=NA,friction=NA) {
       obs_temp <- units::set_units(obs_temp,"degK")
     }
     if(class(obs_press)=="units") {
-      if(identical(units(obs_press),units(set_units(1,inHg))) & adj_inHg) {
+      if(identical(units(obs_press),units(set_units(1,"inHg"))) & adj_inHg) {
         obs_press <- hg_pressure(obs_temp,obs_press) # adjust for the density of Hg
       } else {
         obs_press <- units::set_units(obs_press,"Pa")
