@@ -57,6 +57,7 @@ pwr_corr <- function(ref_temp,ref_press,humidity=NA,friction=NA) {
       obs_temp <- units::set_units(obs_temp,"degK")
     }
     if(class(obs_press)=="units") {
+      #TODO: Adjust pressure for inHg based on temp
       obs_press <- units::set_units(obs_press,"Pa")
     }
     obs_temp <- as.numeric(obs_temp)
@@ -89,24 +90,29 @@ pwr_corr <- function(ref_temp,ref_press,humidity=NA,friction=NA) {
 NULL
 
 #' @describeIn ref_std SAE J607 Standard without any consideration of humidity
+#' @export
 j607 <- pwr_corr(ref_temp = units::set_units(60,"degF"),
                  ref_press = units::set_units(29.92,"inHg"))
 
 #' @describeIn ref_std SAE J1349(1990) standard with efficiency and corrected pressure
+#' @export
 j1349_1990 <- pwr_corr(ref_temp = units::set_units(77,"degF"),
                  ref_press = units::set_units(990,"hPa"),
                  friction = .8475)
 
 #' @describeIn ref_std SAE J1349(2004) standard with revised efficiency
+#' @export
 j1349_2004 <- pwr_corr(ref_temp = units::set_units(77,"degF"),
                        ref_press = units::set_units(990,"hPa"),
                        friction = 0.85)
 
 #' @describeIn ref_std Motorsports Standard Atmosphere
+#' @export
 msa <- pwr_corr(ref_temp = units::set_units(60,"degF"),
                        ref_press = units::set_units(29.92,"inHg"))
 
 #' @describeIn ref_std STD Air Correction
+#' @export
 std <- pwr_corr(ref_temp = units::set_units(68,"degF"),
                 ref_press = units::set_units(29.92,"inHg"))
 
