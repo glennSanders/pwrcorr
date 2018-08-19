@@ -100,7 +100,7 @@ ref_stds <- function(temp,press,hum,adj_inHg) {
     as.tibble(cf)
 }
 
-results(set_units(65, degF),set_units(28.868, inHg),0.6,TRUE)
+ref_stds(set_units(65, degF),set_units(28.868, inHg),0.6,TRUE)
 
 ```
 
