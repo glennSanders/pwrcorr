@@ -5,6 +5,8 @@ Authors@R: person("Glenn", "Sanders", email = "glennwilliamsanders@gmail.com", r
 Description: Takes engine power and applies a correction to Reference Conditions of Temperature, 
     Pressure, Humidity and Engine Friction utilising SAE J607, SAE J1394 (1990), SAE J1394 (2004) and 
     ISO 1585 reference conditions.
+URL: http://github.com/glennSanders/pwrcorr.git
+BugReports: http://github.com//glennSanders/pwrcorr/issues
 Depends: R (>= 3.5.0)
 License: GPL-3
 Encoding: UTF-8
