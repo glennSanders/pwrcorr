@@ -28,6 +28,46 @@ sat_vap_press <- function(temp) {
   return(p)
 }
 
+#' Determine the density of mercury
+#'
+#' @param temp Temperature in Kelvin, or alternatively a variable with temperature units from the \code{units} package.
+#' @return The density of mercury
+#' @references
+#'   \insertRef{noauthor_recognized-value_1985}{pwrcorr}
+#' @import units
+#' @export
+hg_density <- function(temp) {
+  if(class(temp)=="units") {
+    temp <- units::set_units(temp,"degC")
+  } else {
+    temp <- temp - 273.15
+  }
+  temp <- as.numeric(temp)
+  13595.08/(1+(18150.36*temp+
+                 0.70209*temp^2+
+                 2.8655e-3*temp^3+
+                 2.621e-6*temp^4)*1e-8)
+}
+
+#' Determine the pressure of mercury
+#'
+#' This function takes into consideration the effects of
+#' temperature on the density of mercury
+#'
+#' @param temp Temperature in Kelvin, or alternatively a variable with temperature units from the \code{units} package.
+#' @param in_Hg Pressure measured in inches of mercury without temperature adjustment
+#' @return The equivalent pressure in Pa
+#' @import units
+#' @export
+hg_pressure <- function(temp, in_Hg) {
+  in_Hg <- as.numeric(in_Hg)
+  in_Hg <- set_units(in_Hg,"inch")
+  pressure <- set_units(hg_density(temp),"kg/m^3") *
+    set_units(in_Hg,"m") *
+    set_units(9.80665,"m/s^2")
+  set_units(pressure,"Pa")
+}
+
 #' Power Correction Reference
 #'
 #' The function allows for the definition of various reference conditions based on
@@ -52,13 +92,16 @@ pwr_corr <- function(ref_temp,ref_press,humidity=NA,friction=NA) {
   ref_temp <- as.numeric(ref_temp)
   ref_press <- as.numeric(ref_press)
 
-  function(obs_temp,obs_press,obs_hum=0,obs_fric=NA) {
+  function(obs_temp,obs_press,obs_hum=0,obs_fric=NA,adj_inHg=FALSE) {
     if(class(obs_temp)=="units") {
       obs_temp <- units::set_units(obs_temp,"degK")
     }
     if(class(obs_press)=="units") {
-      #TODO: Adjust pressure for inHg based on temp
-      obs_press <- units::set_units(obs_press,"Pa")
+      if(identical(units(obs_press),units(set_units(1,inHg))) & adj_inHg) {
+        obs_press <- hg_pressure(obs_temp,obs_press) # adjust for the density of Hg
+      } else {
+        obs_press <- units::set_units(obs_press,"Pa")
+      }
     }
     obs_temp <- as.numeric(obs_temp)
     obs_press <- as.numeric(obs_press)
@@ -75,6 +118,7 @@ pwr_corr <- function(ref_temp,ref_press,humidity=NA,friction=NA) {
       cf <- (1+friction_cor)*cf-friction_cor
     }
     return(cf)
+    #TODO Add Warnings for cf if excessive
   }
 }
 
@@ -85,25 +129,34 @@ pwr_corr <- function(ref_temp,ref_press,humidity=NA,friction=NA) {
 #' @param obs_press The observed pressure in Pascals or a pressure \code{units} object
 #' @param obs_hum The observed humidity as a percentage between 0 and 1
 #' @param obs_fric The measured efficiency of the engine if available as a percenatge between 0 and 1
+#' @param adj_inHg Adjust pressures measures in inches of mercury to account for density changes at a given temperature
 #' @import units
 #' @name ref_std
 NULL
 
 #' @describeIn ref_std SAE J607 Standard without any consideration of humidity
 #' @export
-j607 <- pwr_corr(ref_temp = units::set_units(60,"degF"),
+naive <- pwr_corr(ref_temp = units::set_units(60,"degF"),
                  ref_press = units::set_units(29.92,"inHg"))
+
+#' @describeIn ref_std SAE J607 Standard with humidity considerations
+#' @export
+j607 <- pwr_corr(ref_temp = units::set_units(60,"degF"),
+                 ref_press = units::set_units(29.92,"inHg"),
+                 humidity = 0)
 
 #' @describeIn ref_std SAE J1349(1990) standard with efficiency and corrected pressure
 #' @export
 j1349_1990 <- pwr_corr(ref_temp = units::set_units(77,"degF"),
-                 ref_press = units::set_units(990,"hPa"),
-                 friction = .8475)
+                       ref_press = units::set_units(990,"hPa"),
+                       humidity = 0,
+                       friction = .8475)
 
 #' @describeIn ref_std SAE J1349(2004) standard with revised efficiency
 #' @export
 j1349_2004 <- pwr_corr(ref_temp = units::set_units(77,"degF"),
                        ref_press = units::set_units(990,"hPa"),
+                       humidity = 0,
                        friction = 0.85)
 
 #' @describeIn ref_std Motorsports Standard Atmosphere

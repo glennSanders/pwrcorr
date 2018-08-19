@@ -2,6 +2,7 @@
 % Please edit documentation in R/correction.R
 \name{ref_std}
 \alias{ref_std}
+\alias{naive}
 \alias{j607}
 \alias{j1349_1990}
 \alias{j1349_2004}
@@ -9,15 +10,19 @@
 \alias{std}
 \title{Reference Standards}
 \usage{
-j607(obs_temp, obs_press, obs_hum = 0, obs_fric = NA)
+naive(obs_temp, obs_press, obs_hum = 0, obs_fric = NA, adj_inHg = FALSE)
 
-j1349_1990(obs_temp, obs_press, obs_hum = 0, obs_fric = NA)
+j607(obs_temp, obs_press, obs_hum = 0, obs_fric = NA, adj_inHg = FALSE)
 
-j1349_2004(obs_temp, obs_press, obs_hum = 0, obs_fric = NA)
+j1349_1990(obs_temp, obs_press, obs_hum = 0, obs_fric = NA,
+  adj_inHg = FALSE)
 
-msa(obs_temp, obs_press, obs_hum = 0, obs_fric = NA)
+j1349_2004(obs_temp, obs_press, obs_hum = 0, obs_fric = NA,
+  adj_inHg = FALSE)
 
-std(obs_temp, obs_press, obs_hum = 0, obs_fric = NA)
+msa(obs_temp, obs_press, obs_hum = 0, obs_fric = NA, adj_inHg = FALSE)
+
+std(obs_temp, obs_press, obs_hum = 0, obs_fric = NA, adj_inHg = FALSE)
 }
 \arguments{
 \item{obs_temp}{The observed temperature in Degrees Kelvin or a temperature \code{units} object}
@@ -27,13 +32,17 @@ std(obs_temp, obs_press, obs_hum = 0, obs_fric = NA)
 \item{obs_hum}{The observed humidity as a percentage between 0 and 1}
 
 \item{obs_fric}{The measured efficiency of the engine if available as a percenatge between 0 and 1}
+
+\item{adj_inHg}{Adjust pressures measures in inches of mercury to account for density changes at a given temperature}
 }
 \description{
 The various correction factors found in the literature
 }
 \section{Functions}{
 \itemize{
-\item \code{j607}: SAE J607 Standard without any consideration of humidity
+\item \code{naive}: SAE J607 Standard without any consideration of humidity
+
+\item \code{j607}: SAE J607 Standard with humidity considerations
 
 \item \code{j1349_1990}: SAE J1349(1990) standard with efficiency and corrected pressure
 

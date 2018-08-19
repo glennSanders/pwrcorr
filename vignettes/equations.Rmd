@@ -1,10 +1,10 @@
 ---
-title: "Power Correction Equations"
+title: "Use of Power Correction Equations"
 author: "Glenn Sanders"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Power Correction Equations}
+  %\VignetteIndexEntry{Use of Power Correction Equations}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -26,6 +26,8 @@ Similarly a maximum drawbar power of 42.90 Hp was recorded at a temperature of 7
 
 At the conclusion of the test a corrected Belt and Drawbar power of 50.38 and 45.43 Hp is provided.
 
+The observed horsepower is recorded in the following data.frame.
+
 
 ```{r message=FALSE, warning=FALSE}
 library(units)
@@ -41,13 +43,67 @@ test
 
 ```
 
-The following formula replicates these adjustments,
+The following `naive` formula replicates the corrected horsepower figures
 
 ```{r}
 test %>% 
-  mutate(corr_factor = j607(temp,press)) %>% 
+  mutate(corr_factor = naive(temp,press)) %>% 
   mutate(std_hp=test_hp * corr_factor)
 ```
+
+## Pressure (inHg) Adjustment
+
+The issue with the inches of mercury pressure unit is that it is subject to change based on temperature as the mercury expands or contracts at the same pressure. An adjustment can be included with slightly different outcomes. 
+
+```{r}
+test %>% 
+  mutate(corr_factor = naive(temp,press,adj_inHg = TRUE)) %>% 
+  mutate(std_hp=test_hp * corr_factor)
+```
+
+## Effects of humidity
+
+The humidity of the above test is not recorded, however the effects of humidity can be included. The test was conducted over the period 25 May until 10 June 1954. Looking at [past weather data for Lincoln Nebraska](https://www.wunderground.com/history/weekly/KLNK/date/1954-5-26?req_city=Lincoln&req_state=NE&req_statename=Nebraska&reqdb.zip=68501&reqdb.magic=1&reqdb.wmo=99999) allows one to determine the minimum relative humidity. The minimum is chosen to be conservative and also to reflect the reducing humidity during the day when testing
+
+
+```{r}
+test <- test %>% 
+  mutate(assumed_humidity = c(.6,.4)) 
+test
+```
+
+Now evaluating the corrected power taking into consideration the humidity.
+
+```{r}
+test %>% 
+  mutate(corr_factor = j607(temp,press,assumed_humidity)) %>% 
+  mutate(std_hp=test_hp * corr_factor)
+```
+
+Or making the density adjustment of mercury
+
+```{r}
+test %>% 
+  mutate(corr_factor = j607(temp,press,assumed_humidity,adj_inHg = TRUE)) %>% 
+  mutate(std_hp=test_hp * corr_factor)
+```
+
+
+## Different correction factors
+
+Different reference standards will lead to different results. It is important when conducting any comparison that the same reference is used. In this way the scale is not as important as the relative differences.
+
+```{r}
+ref_stds <- function(temp,press,hum,adj_inHg) {
+    ref_stds <- list(naive=naive, j607=j607,j1349_1990=j1349_1990,j1349_2004=j1349_2004)
+    cf <- lapply(ref_stds, function(f) f(temp,press,hum,NA,adj_inHg))
+    as.tibble(cf)
+}
+
+results(set_units(65, degF),set_units(28.868, inHg),0.6,TRUE)
+
+```
+
 
 
 

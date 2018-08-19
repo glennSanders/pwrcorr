@@ -1,0 +1,43 @@
+---
+title: "Create a new Reference Standard"
+author: "Glenn Sanders"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{"Create a new Reference Standard"}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## Create a new standard
+
+To create a new standard the `pwr_corr` function is used.
+
+The `ref_temp` and `ref_press` are self explanatory
+
+The consideration of humidity may or may not be included. Humidty is used to adjust the wet pressure to an equivalent dry pressure. If `humidity = NA` then humidty is not taken into consideration in the calculations regardless of its input value. Friction is the same. If  `friction = NA` the no friction is included in the calculations.
+
+As an example of the SAE J1349(2004) standard definition
+
+```{r message=FALSE, warning=FALSE}
+library(pwrcorr)
+library(units)
+j1349_2004 <- pwr_corr(ref_temp = set_units(77,"degF"),
+                       ref_press = set_units(990,"hPa"),
+                       humidity = 0,
+                       friction = 0.85)
+```
+
+To use the equation then
+
+```{r}
+j1349_2004(set_units(65, "degF"),set_units(28.868, "inHg"),0.6)
+```
+
